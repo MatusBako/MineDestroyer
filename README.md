@@ -49,6 +49,7 @@ Middle- ak je blizsie ako fast a moze, bere, inak bere fast a M objavuje
 
 Agent má **4 stavy** činnosti: 
 
+
 - state(explore) : agent nemá informáciu o existujúcich surovinách a je na ceste na nepreskúmané súradnice
 
 -  state(locateRes) : agent je na ceste ku surovine, agenti samostatne rozhodnú podľa ich pozícii ktorý to pôjde zobrať, ostatným sa to vyhodí z BB
@@ -59,30 +60,28 @@ Agent má **4 stavy** činnosti:
 
 
 
-- state(return) & pos(depo)		-> explore
-- state(return)				-> goto(dep)
-- state(locatePow) & pos(pow)	-> explore
-- state(locatePow)
-- state(locateRes) & pos(res)		-> pick(Res), state(explore|return)
-- state(locateRes)			-> goto(Res)
+| Podmienka | Ďalší stav  |
+| --------------- | -------------- |
+| state(return) & pos(depo) 		| explore |
+| state(return)					| goto(dep) |
+| state(locatePow) & pos(pow)	| pick(pow), explore |
+| state(locatePow)				| goto(pow) |
+| state(locateRes) & pos(res)		| pick(Res), state(explore|return) |
+| state(locateRes) 				| goto(Res) |
+| state(explore) & dbWood(X,Y) & not targeted(X,Y) & canCarryWood | state(locateRes), target(X, Y) |
+| state(explore) & dbGold(X,Y) & not targeted(X,Y) & canCarryGold | state(locateRes), target(X, Y) |
+| state(explore) & mapUnexplored() | explore |
 
-- state(explore) & dbWood(X,Y) & not targeted(X,Y)	
-	& canCarryWood -> state(locateRes), targeted(X, Y)
-		
-- state(explore) & dbGold(X,Y) & not targeted(X,Y)	
-	& canCarryGold -> state(locateRes), targeted(X, Y)
-
-- state(explore) & mapUnexplored() -> explore
-.
-
-
-MED
+#### MED
 //TODO: asi to isté ako fast, bude to genericky nakódené
 
-SLOW
-- not hasSpectacles & dbSpectacles(X,Y)	-> goto(spectacles)
-- mapUnexplored					-> explore
-- capacityReached 				-> goto(dep)
-- pos(res)						-> goto(Res)
-- pickResources					-> goto(Res)
-.
+#### SLOW
+
+| Podmienka | Ďalší stav  |
+| --------------- | -------------- |
+| not hasSpectacles & dbSpectacles(X,Y)	| goto(spectacles)
+| mapUnexplored						| explore
+| capacityReached 						| goto(dep)
+| pos(res)							| pick(Res)
+| pickResources						| goto(Res)
+

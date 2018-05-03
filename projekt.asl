@@ -5,80 +5,20 @@
 
 //{ include("./a_star.asl")  }
 { include("percepts.asl") }
+{ include("common.asl") }
 
-//TODO: do goto pridat preposielanie suradnic medzi MED a FAST
-+!goto(X,Y) : pos(X,Y) <-
-	!skipTurn.
-+!goto(X,Y).
-
-+!skipRestOfTurn <-
-	.while (moves_left(Left) & Left > 0)
-	{
-		do(skip)	
-	}.
-
-+!unbelieve(X) <- abolish(X).
-
-+!tellFriends(X) <-
-	.for(friend(A))
-	{
-		.send(A,tell,X);
-	}.
-
-+!untellFriends(X) <-
-	.for(friend(A))
-	{
-		.send(A,achieve,unbelieve(X));
-	}.
-
-+!target(X,Y) <-
-	+targeted(X,Y);
-	!tellFriends(targeted(X,Y)).
-
-
-// agent carrieso only one of these
-// but it works anyway
-capacityReached :-
-	carrying_gold(G) &
-	carrying_wood(W) &
-	carrying_capacity(MAX) &
-	G + W == MAX.
-
-onPowerUp :-
-	pos(X,Y) &
-	.my_name(Name) &
-	.length(Name,Length) &
-	.nth(Length-1, Name,Last)
-	(
-		(gloves(GX,GY) & Last == "t" & HX == X & HY == Y) |		//fast
-		(spectacles(SX,SY) & Last == "e" & GX == X & GY == Y) |	//middle
-		(shoes(HX,HY) & Last == "w" & SX == X & SY == Y)		//slow
-	).
-
-// becuse agent carries one type of resource at a time
-canCarryWood :- carrying_gold(G) & G == 0 & ~capacityReached.
-canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
-
-+!scanArea <-
-	?pos(X,Y);
-	?sight(S)
-	.findall(unexplored(UX,UY),math.abs(X-UX) <= S & math.abs(Y-UY) <= S, L);
-	.for (.member(M,L))
-	{
-		-unexplored(X,Y);
-		!untellFriends(unexplored(X,Y))
-	}.
-
-		
 +!step(0) <-
-	for ( .range(X,0,39))
+	?grid_size(XS,YS);_
+	for ( .range(X,0,XS-1))
 	{
-		for ( .range(Y,0,39))
+		for ( .range(Y,0,YS-1))
 		{
 			+unexplored(X,Y)
 		}
 	};
-	+state(explore).
+	!nextAction.
+
+//TODO: rework imminent!
 
 +!step(S): state(locatePow)
 
