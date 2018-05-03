@@ -1,88 +1,113 @@
-/*
-MAP EXCHANGE:
-na zaciatku (raz) a po kazdom pohybe poslat suradnice mapy inym agentom
-s cislom kola (step), pockat si na flag, ze si dostal vsetky suradnice
-*/
++sight(1). // different for other agents
++fastName(teamAFast).
++medName(teamAMedium).
++slowName(teamASlow).
 
-/*
-Rozhodovanie - komu dat ulohu brat suroviny
+//{ include("./a_star.asl")  }
+{ include("percepts.asl") }
 
-Slow- ak je blizsie ako fast objavovanie
-Fast - ak vie o surovinach - zober, inak objavuj
-Middle- ak je blizsie ako fast, ber, inak fast, inak explore
-*/
+//TODO: do goto pridat preposielanie suradnic medzi MED a FAST
++!goto(X,Y) : pos(X,Y) <-
+	!skipTurn.
++!goto(X,Y).
 
-+distance(X1, Y1, X2, Y2, R) <-
-	R = math.abs(X1 - X2) + math.abs(Y1 - Y2).
++!skipRestOfTurn <-
+	.while (moves_left(Left) & Left > 0)
+	{
+		do(skip)	
+	}.
 
-// TODO: GOTO
-// ides kym mozes, ak nemozes, po pravej ruke kym nemozes spravnym smerom
-// ukladas si odkial si prisiel aby si sa netocil
++!unbelieve(X) <- abolish(X).
 
-/*
-Rozhlad je STVORCOVY
++!tellFriends(X) <-
+	.for(friend(A))
+	{
+		.send(A,tell,X);
+	}.
 
-na zaciatku vygenerovat suradnice nepreskumanych policok 
-	a postupne odoberat
++!untellFriends(X) <-
+	.for(friend(A))
+	{
+		.send(A,achieve,unbelieve(X));
+	}.
 
-getUnexplored - vyriesene, A* riesi cestu, pripadne vyraduje
++!target(X,Y) <-
+	+targeted(X,Y);
+	!tellFriends(targeted(X,Y)).
 
-- A* volat s parametrom kolko tahov ma vratit
-- ked vrati prazdny zoznam, neexistuje cesta
 
-3 stavy - exploring, returning, goingToResource
-
-- rozhlad a power-upy napevno z belief base (getRange)
-*/
-
-+!goto(X,Y) <-
-	pos(X,Y);
-	!skipMoves().
-
-+!goto(X,Y) <-
-
-+!skip <-
-	moves_left(Left);
-	Left > 0;
-	do(skip);	// skip or not??
-	!goto(X,Y)
-+!skip <- true.
-
-// TODO: SCAN
-// zistis co mas v okoli a preposles ostatnym
-
-+!scanArea<-
-	pos(X,Y),
-
-// grid_size(A,B)
-
-+!storeInv <-
-	depot(X,Y);
-	pos(X,Y);
-	do(drop).
-
-+!storeInv <-
-	depot(X,Y);
-	goto(X,Y).
-
+// agent carrieso only one of these
+// but it works anyway
 capacityReached :-
 	carrying_gold(G) &
 	carrying_wood(W) &
 	carrying_capacity(MAX) &
 	G + W == MAX.
 
-+!step(X): capacityReached <-
-	!storeInv.
+onPowerUp :-
+	pos(X,Y) &
+	.my_name(Name) &
+	.length(Name,Length) &
+	.nth(Length-1, Name,Last)
+	(
+		(gloves(GX,GY) & Last == "t" & HX == X & HY == Y) |		//fast
+		(spectacles(SX,SY) & Last == "e" & GX == X & GY == Y) |	//middle
+		(shoes(HX,HY) & Last == "w" & SX == X & SY == Y)		//slow
+	).
 
-+!step(X): ResourcePos(X,Y) & pos(X, Y) <-
+// becuse agent carries one type of resource at a time
+canCarryWood :- carrying_gold(G) & G == 0 & ~capacityReached.
+canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
+
++!scanArea <-
+	?pos(X,Y);
+	?sight(S)
+	.findall(unexplored(UX,UY),math.abs(X-UX) <= S & math.abs(Y-UY) <= S, L);
+	.for (.member(M,L))
+	{
+		-unexplored(X,Y);
+		!untellFriends(unexplored(X,Y))
+	}.
+
+		
++!step(0) <-
+	for ( .range(X,0,39))
+	{
+		for ( .range(Y,0,39))
+		{
+			+unexplored(X,Y)
+		}
+	};
+	+state(explore).
+
++!step(S): state(locatePow)
+
++!step(S): state(return) & depot(X,Y) & pos(X,Y) <-
+	do(drop);
+	-state().
+
++!step(S): state(return) <-
+	?depot(X,Y);
+	goto(X,Y).
+
++!step(S): onPowerUp <-
 	do(pick).
+	
 
-// TODO: zdvihni powerup
++!step(S): dbWood(X,Y) & pos(X, Y) & canCarryWood<-
+	do(pick);
+	-dbWood(X,Y);
+	!untellFriends(dbWood(X,Y)).
 
-+!step(X): ResourcePos(X,Y) <-
++!step(S): dbGold(X,Y) & pos(X, Y) & canCarryGold<-
+	do(pick);
+	-dbGold(X,Y);
+	!untellFriends(dbGold(X,Y)).
+
++!step(S): carrying_wood(W) & W > 0 dbWood(X,Y) <-
 	!goto(X,Y).
 
-+!step(X): mapNotExplored() <-
-	getUnexploredPos(X,Y),
++!step(S): state(explore) & unexplored(X,Y) <-
+	?unexploredPos(X,Y); //get from A*
 	goto(X,Y).
-+!step(X).
++!step(S).
