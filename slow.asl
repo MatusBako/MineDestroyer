@@ -3,13 +3,39 @@
 +medName(teamAMedium).
 +slowName(teamASlow).
 
-//{ include("./a_star.asl")  }
 { include("percepts.asl") }
-{ include("common.asl") }
+{ include("common.asl") }	
+
+// reaction to seeing removed resource on turn end after scan
+-dbSpectacles(X,Y): target(X,Y) <-
+	-target(X,Y);
+	!nextAction.
+
+-dbGold(X,Y): target(X,Y) <-
+	-target(X,Y);
+	!nextAction.
+
+-dbWood(X,Y): target(X,Y) <-
+	-target(X,Y);
+	!nextAction.
+
+// not necessary but saves steps
+// choose next action immediately
+// after last one got cancelled
++!nextAction: unexplored(_,_) <-
+	!explore.
++!nextAction: dbSpectacles(X,Y) & not hasSpectacles <-
+	!target(X,Y);
+	!goto(X,Y).
++!nextAction: dbWood(X,Y) & not targeted(X,Y) <-
+	!target(X,Y);
+	!goto(X,Y).
++!nextAction: dbGold(X,Y) & not targeted(X,Y) <-
+	!target(X,Y);
+	!goto(X,Y).
++!nextAction.
 
 
-//TODO: do goto pridat preposielanie suradnic medzi MED a FAST
-		
 +!step(0) <-
 	?grid_size(XS,YS);_
 	for ( .range(X,0,XS-1))
@@ -22,20 +48,22 @@
 	!scanArea;
 	!explore.
 
-+!step(S): onPowerUp(dbSpectacles) <-
++!step(S): pos(X,Y) & spectacles(X,Y) & not hasSpectacles <-
 	!pick(dbSpectacles(X,Y));
 	+hasSpectacles;
 	-sight(3);
 	+sight(6).
 	
 +!step(S): dbSpectacles(X,Y) & not hasSpectacles <-
+	!target(X,Y);
 	!goto(X,Y).
 
 +!step(S): unexplored(X,Y) <-
 	!explore.
 
 +!step(S): capacityReached & pos(X,Y) & depot(X,Y) <-
-	do(drop).
+	do(drop);
+	!nextAction.
 
 +!step(S): capacityReached <-
 	?depot(X,Y);
@@ -47,8 +75,6 @@
 +!step(S): pos(X,Y) & gold(X,Y) <-
 	!pick(dbGold(X,Y)).
 
-+!step(S): pos(X,Y) & target(TX,TY) & math.abs(X-TX)  
-
 +!step(S): dbGold(X,Y) & not targeted(X,Y) <- 
 	!target(X,Y);
 	!goto(X,Y).
@@ -56,3 +82,4 @@
 +!step(S): dbWood(X,Y) & not targeted(X,Y) <- 
 	!target(X,Y);
 	!goto(X,Y).
++!step(S).

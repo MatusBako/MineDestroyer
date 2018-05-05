@@ -34,26 +34,10 @@ capacityReached :-
 	carrying_capacity(MAX) &
 	G + W == MAX.
 
-onPowerUp(dbShoes) :-		//fast
-	pos(X,Y) &
-	.my_name(Name) &
-	.length(Name,Length) &
-	.nth(Length-1, Name,Last) & 
-	shoes(X,Y) & Last == "t" &.
-
-onPowerUp(dbGloves) :-	//middle
-	pos(X,Y) &
-	.my_name(Name) &
-	.length(Name,Length) &
-	.nth(Length-1, Name,Last) &
-	gloves(X,Y) & Last == "e".
-
-onPowerUp(dbSpectacles) :-		//slow
-	pos(X,Y) &
-	.my_name(Name) &
-	.length(Name,Length) &
-	.nth(Length-1, Name,Last)
-	spectacles(X,Y) & Last == "w".
+inSight(X,Y,TX,TY) :- 
+	sight(Sight) & 
+	math.abs(X-TX) <= Sight &
+	math.abs(Y-TY) <= Sight.
 
 canCarryWood :- carrying_gold(G) & G == 0 & ~capacityReached.
 canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
@@ -65,19 +49,21 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 	!untellFriends(Item(X,Y));
 	!untellFriends(targeted(X,Y)).
 
-+!goto(X,Y) : pos(X,Y) <-
++!goto(X,Y): pos(X,Y) <-
 	!skipTurn.
++!goto(X,Y): moves_left(X) & X == 0.
 +!goto(X,Y) <-
 	!move; //TODO: w8ing 4 A*
 	!scanArea.
 
 +!target(X,Y) <-
+	+target(X,Y);
 	+targeted(X,Y);
 	!tellFriends(targeted(X,Y)).
 
 +!scanArea <-
 	?pos(X,Y);
-	?sight(S)
+	?sight(S);
 	.findall(unexplored(UX,UY),math.abs(X-UX) <= S & math.abs(Y-UY) <= S, L);
 
 	// remove unexplored tiles
@@ -100,7 +86,8 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 				-Item(X,Y);
 
 				// TODO: every agent reacts differently to this
-				!untellFriends(Item(X,Y))
+				!untellFriends(Item(X,Y));
+				!untellFriends(targeted(X,Y)).
 			}
 		}
 	}.
