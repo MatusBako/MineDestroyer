@@ -5,12 +5,12 @@ get_distance(loc(FromX, FromY), loc(ToX, ToY), Dist) :- Dist = math.abs(FromX-To
 
 
 //ocekava dvojici From - loc(X, Y) a To - loc(X,Y)
-get_instructions(X, X, Instructions).
-get_instructions(From, To, Instructions) :-
+get_instructions(X, X, _, Instructions).
+get_instructions(From, To, N, Instructions) :-
 	get_path(From, To, Path)&
-	truncate(Path, 4, InstrToTrunc) &
+	truncate(Path, N+1, InstrToTrunc) &
 	to_instr(InstrToTrunc, InstrPad) &
-	right_pad(InstrPad, Instructions).
+	right_pad(InstrPad, N, Instructions).
 
 //zkrati na L
 truncate(_, 0, []).
@@ -19,9 +19,9 @@ truncate([H|I], L, [H|O]) :-
 	
 	
 //pads instruction list with pass to length 3
-right_pad(I, P) :- 
+right_pad(I, N, P) :- 
 	.reverse(I,R) &
-	left_pad(R, 3, L) &
+	left_pad(R, N, L) &
 	.reverse(L, P).
 left_pad(_, 0, []).
 left_pad(L, N, FL) :-
@@ -86,7 +86,7 @@ filter_impossible([],[]).
 filter_impossible([node(loc(X, Y), Gs, V)|T],[node(loc(X, Y), Gs, V)|F]) :-
 	X>=0 & Y>=0 &
 	grid_size(A, B) & X<A & Y<B &
-	not obstacle(X,Y) &
+	not dbObstacle(X,Y) &
 	filter_impossible(T, F).
 filter_impossible([H|T], F) :-
 	filter_impossible(T, F).

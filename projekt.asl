@@ -65,12 +65,12 @@
 
 
 // full capacity
-+!step(S): capacityReached & pos(X,Y) & depot(X,Y) <-
++!step(S): capacityReached & pos(X,Y) & dbDepot(X,Y) <-
 	do(drop);
-	!nezxtAction.
+	!nextAction.
 
 +!step(S): capacityReached <-
-	?depot(X,Y);
+	?dbDepot(X,Y);
 	!goto(X,Y).
 
 

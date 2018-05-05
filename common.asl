@@ -1,4 +1,4 @@
-
+{ include("a_star.asl") }
 // map between BB info and percepts
 map(dbShoes(X,Y),shoes(X,Y)).
 map(dbGloves(X,Y),gloves(X,Y)).
@@ -81,9 +81,10 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 
 +!goto(X,Y): pos(X,Y) <-
 	!skipTurn.
-+!goto(X,Y): moves_left(X) & X == 0.
-+!goto(X,Y) <-
-	!move; //TODO: w8ing 4 A*
++!goto(X,Y): moves_left(N) & N == 0.
++!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <- for ( .member(X,Moves) ) {
+        do(X);    // print all members of the list
+     }
 	!scanArea.
 
 +!target(X,Y) <-
@@ -100,7 +101,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 	for (.member(M,L))
 	{
 		-unexplored(X,Y);
-		!untellFriends(unexplored(X,Y))
+		!untellFriends(unexplored(X,Y));
 	};
 
 	// remove vanished resources
@@ -116,7 +117,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 				.abolish(Item);
 
 				!untellFriends(Item);
-				!untellFriends(targeted(IX,IY))
+				!untellFriends(targeted(IX,IY));
 			}
 		}
 	}.

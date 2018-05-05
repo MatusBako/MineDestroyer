@@ -5,6 +5,8 @@
 		.send(A,tell,dbObstacle(X,Y));
 	}.
 
++depot(X,Y) <- +dbDepot(X,Y).
+	
 +wood(X,Y): not dbWood(X,Y) <-
 	+dbWood(X,Y);
 	for(friend(A))

@@ -61,12 +61,12 @@
 +!step(S): unexplored(X,Y) <-
 	!explore.
 
-+!step(S): capacityReached & pos(X,Y) & depot(X,Y) <-
++!step(S): capacityReached & pos(X,Y) & dbDepot(X,Y) <-
 	do(drop);
 	!nextAction.
 
 +!step(S): capacityReached <-
-	?depot(X,Y);
+	?dbDepot(X,Y);
 	!goto(X,Y).
 
 +!step(S): pos(X,Y) & wood(X,Y) <-
