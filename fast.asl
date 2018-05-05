@@ -1,11 +1,8 @@
 +sight(1). // different for other agents
-+fastName(teamAFast).
-+medName(teamAMedium).
-+slowName(teamASlow).
 
+{ include("a_star.asl") }
+{ include("common.asl") }	
 { include("percepts.asl") }
-{ include("common.asl") }
-
 
 // reaction to seeing removed resource on turn end after scan
 -dbShoes(X,Y): target(X,Y) <-
@@ -42,7 +39,7 @@
 
 
 +!step(0) <-
-	?grid_size(XS,YS);_
+	?grid_size(XS,YS);
 	for ( .range(X,0,XS-1))
 	{
 		for ( .range(Y,0,YS-1))
@@ -50,6 +47,7 @@
 			+unexplored(X,Y)
 		}
 	};
+	!scanArea;
 	!nextAction.
 
 
@@ -73,7 +71,6 @@
 	?depot(X,Y);
 	!goto(X,Y).
 
-
 // pickup Resources
 +!step(S): pos(X,Y) & wood(X,Y) & canCarryWood <-
 	!pick(dbWood(X,Y)).
@@ -96,9 +93,11 @@
 	!target(X,Y);
 	!goto(X,Y).
 
+
 // exploration
 +!step(S): unexplored(X,Y) <-
 	!explore.
 
 // terminal rule
 +!step(S).
+
