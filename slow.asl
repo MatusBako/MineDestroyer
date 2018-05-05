@@ -37,7 +37,7 @@
 
 
 +!step(0) <-
-	?grid_size(XS,YS);_
+	?grid_size(XS,YS);
 	for ( .range(X,0,XS-1))
 	{
 		for ( .range(Y,0,YS-1))
@@ -82,4 +82,6 @@
 +!step(S): dbWood(X,Y) & not targeted(X,Y) <- 
 	!target(X,Y);
 	!goto(X,Y).
+
 +!step(S).
+

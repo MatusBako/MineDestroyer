@@ -87,6 +87,16 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
      }
 	!scanArea.
 
+	
++!explore : pos(A,B)<-
+	.println("** Exploring", A, B);
+	.findall(dst(Dist,X,Y), unexplored(X,Y) & get_distance(loc(A,B), loc(X,Y), Dist), Unx);
+	.min(Unx, Dst);
+	Dst = dst(_, X, Y);
+	+goto(X,Y).
+	
+
+	
 +!target(X,Y) <-
 	+target(X,Y);
 	+targeted(X,Y);
