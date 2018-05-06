@@ -47,8 +47,9 @@ sight(1). // different for other agents
 			+unexplored(X,Y)
 		}
 	};
-	
+	.println("** scanning area");
 	!scanArea;
+	.println("** scanned area");
 	!nextAction.
 
 

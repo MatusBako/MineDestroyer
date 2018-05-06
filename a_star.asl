@@ -8,9 +8,10 @@ get_distance(loc(FromX, FromY), loc(ToX, ToY), Dist) :- Dist = math.abs(FromX-To
 get_instructions(X, X, _, Instructions).
 get_instructions(From, To, N, Instructions) :-
 	get_path(From, To, Path)&
-	truncate(Path, N+1, InstrToTrunc) &
-	to_instr(InstrToTrunc, InstrPad) &
-	right_pad(InstrPad, N, Instructions).
+	//.println("Found path",Path)&
+	to_instr(Path, InstrPad) &
+	right_pad(InstrPad, N, InstrTrunc) &
+	truncate(InstrTrunc, N, Instructions).
 
 //zkrati na L
 truncate(_, 0, []).
@@ -51,7 +52,7 @@ to_instr([], []).
 
 //najde cestu s A*	
 get_path(From, To, Path) :- 
-	//astar([node(0, [From], [])], To, Path).
+	get_distance(From, To, Dist)&
 	astar([node(From, 0, Dist)], [], From, To, Path).
 
 //A*	
@@ -78,6 +79,8 @@ expand(node(loc(X, Y), Gscore, StartVal), Open, Closed, Start, Goal, Expanded) :
 					   node(loc(X, Y+1), Gscore+1, Gscore+DistDown),
 					   node(loc(X+1, Y), Gscore+1, Gscore+DistRight),
 					   node(loc(X-1, Y), Gscore+1, Gscore+DistLeft)], OnlyCorrect)&
+	//.println("Open", Open)&
+	//.println("Closed", Closed)&
 	filter_open(OnlyCorrect, Open, NotOpen)&
 	filter_closed(NotOpen, Closed, Expanded).
 
@@ -94,10 +97,14 @@ filter_impossible([H|T], F) :-
 //Filters out nodes that are in the closed set
 filter_closed([], _, []).
 filter_closed([H|T], Closed, F) :-
-	.member(H, Closed)&
+	node_loc_member(H, Closed)&
 	filter_closed(T, Closed, F).
 filter_closed([H|T], Closed, [H|F]) :-
 	filter_closed(T, Closed, F).
+
+node_loc_member(node(loc(X, Y), _, _), [loc(X, Y)|_]).
+node_loc_member(X, [_|Tail]) :-
+  node_loc_member(X, Tail).
 	
 //Filters out nodes that are in the closed set
 filter_open([], _, []).
@@ -110,6 +117,7 @@ filter_open([H|T], Open, [H|F]) :-
 node_member(node(loc(X, Y), _, _), [node(loc(X, Y), _, _)|_]).
 node_member(X, [_|Tail]) :-
   node_member(X, Tail).
+  
 
 filter_gscore([], _, []).
 filter_gscore([node(_, Gs, _)|T], Gscore, F) :-

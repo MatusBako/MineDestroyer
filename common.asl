@@ -84,11 +84,13 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 	!skipTurn.
 +!goto(X,Y): moves_left(N) & N == 0.
 +!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <-
-	.println("Moves: ",Moves);	
-	for ( .member(X,Moves) ) 
+	.println("Moves: ",Moves);
+	.println("From: ",loc(A,B));
+	.println("To: ",loc(X,Y));
+	for ( .member(M,Moves) ) 
 	{	
-		.println("Moving ",X);
-		do(X);    // print all members of the list
+		.println("Moving ",M);
+		do(M);
 	}
 	!scanArea.
 
@@ -96,7 +98,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 +!explore : pos(A,B)<-
 	.println("** Exploring", A,", ", B);
 	.findall(dst(Dist,X,Y),unexplored(X,Y) & 
-		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y), Unx);
+		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y) , Unx);
 	.min(Unx, Dst);
 	Dst = dst(_, X, Y);
 	!goto(X,Y).
@@ -124,7 +126,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 		.abolish(M);
 		!untellFriends(M);
 	};
-
+	.println("** Passed remove of unexplored");
 	// remove vanished resources
 	.findall(dbShoes(IX,IY),dbShoes(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, H);
 	for (.member(M,H))
@@ -137,6 +139,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 			!untellFriends(targeted(IX,IY));
 		}
 	};
+	.println("** Passed remove vanished resources");
 
 	.findall(dbGloves(IX,IY),dbGloves(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, L);
 	for (.member(M,L))
@@ -149,6 +152,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 			!untellFriends(targeted(IX,IY));
 		}
 	};	
+	.println("** Passed finding gloves");
 
 	.findall(dbSpectacles(IX,IY),dbSpectacles(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, P);
 	for (.member(M,P))
@@ -163,6 +167,7 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 		}
 	};
 
+	.println("** Passed finding spectacles");
 	.findall(dbGold(IX,IY),dbGold(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, G);
 	for (.member(M,G))
 	{
@@ -175,6 +180,8 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 			!untellFriends(targeted(IX,IY));
 		}
 	};
+	
+	.println("** Passed finding wood");
 
 	.findall(dbWood(IX,IY),dbWood(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, W);
 	for (.member(M,W))
