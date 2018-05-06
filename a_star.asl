@@ -5,13 +5,17 @@ get_distance(loc(FromX, FromY), loc(ToX, ToY), Dist) :- Dist = math.abs(FromX-To
 
 
 //ocekava dvojici From - loc(X, Y) a To - loc(X,Y)
-get_instructions(X, X, _, Instructions).
+get_instructions(X, X, _, [skip]).
+get_instructions(_, Y, _, [skip]) :- not possible(Y).
 get_instructions(From, To, N, Instructions) :-
+	.println("Path from",From)&
+	.println("Path to",To)&
 	get_path(From, To, Path)&
-	//.println("Found path",Path)&
+	.println("Found path",Path)&
 	to_instr(Path, InstrPad) &
 	right_pad(InstrPad, N, InstrTrunc) &
-	truncate(InstrTrunc, N, Instructions).
+	truncate(InstrTrunc, N, Instructions) &
+	.println("Sending path").
 
 //zkrati na L
 truncate(_, 0, []).
@@ -47,6 +51,8 @@ to_instr([loc(X1,Y1), loc(X2,Y2)|T], [down|Instr]) :-
 to_instr([loc(X1,Y1), loc(X2,Y2)|T], [up|Instr]) :-
 	X2=X1 & Y2=Y1-1 &
 	to_instr([loc(X2,Y2)|T], Instr).
+to_instr([loc(X1,Y1), loc(X2,Y2)|T], [skip|Instr]) :-
+	to_instr([loc(X2,Y2)|T], Instr).
 to_instr(X, []) :- .length(X) = 1.
 to_instr([], []).
 
@@ -60,7 +66,7 @@ astar(Open, Closed, Start, Goal, Solution) :- astar(Open, Closed, Start, Goal, [
 astar(_, _, Start, Goal, [Goal|Path], Solution) :-
 	.reverse([Goal|Path], Solution).
 astar(_, Closed, Start, Goal, Path, Solution) :-
-	.length(Closed) > 80 &
+	.length(Closed) > 20 &
 	.reverse(Path, Solution).
 astar(Open, Closed, Start, Goal, Path, Solution) :-
 	get_min(Open, node(Best, Gscore, BestVal))&
@@ -79,8 +85,8 @@ expand(node(loc(X, Y), Gscore, StartVal), Open, Closed, Start, Goal, Expanded) :
 					   node(loc(X, Y+1), Gscore+1, Gscore+DistDown),
 					   node(loc(X+1, Y), Gscore+1, Gscore+DistRight),
 					   node(loc(X-1, Y), Gscore+1, Gscore+DistLeft)], OnlyCorrect)&
-	//.println("Open", Open)&
-	//.println("Closed", Closed)&
+	.println("Open", Open)&
+	.println("Closed", Closed)&
 	filter_open(OnlyCorrect, Open, NotOpen)&
 	filter_closed(NotOpen, Closed, Expanded).
 
@@ -93,6 +99,10 @@ filter_impossible([node(loc(X, Y), Gs, V)|T],[node(loc(X, Y), Gs, V)|F]) :-
 	filter_impossible(T, F).
 filter_impossible([H|T], F) :-
 	filter_impossible(T, F).
+
+possible(loc(X,Y)):-
+	grid_size(A, B) & X<A & Y<B &
+	not dbObstacle(X,Y).
 
 //Filters out nodes that are in the closed set
 filter_closed([], _, []).

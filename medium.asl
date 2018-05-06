@@ -1,4 +1,4 @@
-+sight(1). // different for other agents
+sight(1). // different for other agents
 
 { include("a_star.asl") }
 { include("common.asl") }	
@@ -65,7 +65,7 @@
 // full capacity
 +step(S): capacityReached & pos(X,Y) & depot(X,Y) <-
 	do(drop);
-	!nezxtAction.
+	!nextAction.
 
 +step(S): capacityReached <-
 	?depot(X,Y);

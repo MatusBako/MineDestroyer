@@ -1,4 +1,4 @@
-+sight(3). // different for other agents
+sight(3). // different for other agents
 +fastName(teamAFast).
 +medName(teamAMedium).
 +slowName(teamASlow).

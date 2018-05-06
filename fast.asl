@@ -47,9 +47,7 @@ sight(1). // different for other agents
 			+unexplored(X,Y)
 		}
 	};
-	.println("** scanning area");
 	!scanArea;
-	.println("** scanned area");
 	!nextAction.
 
 
@@ -67,7 +65,7 @@ sight(1). // different for other agents
 // full capacity
 +step(S): capacityReached & pos(X,Y) & depot(X,Y) <-
 	do(drop);
-	!nezxtAction.
+	!nextAction.
 
 +step(S): capacityReached <-
 	?depot(X,Y);
