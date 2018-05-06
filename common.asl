@@ -33,6 +33,7 @@ getPos(dbWood(X,Y), X, Y).
 	}.
 
 +!unbelieve(X) <- .abolish(X).
++!unbelieve(X)[_] <- .abolish(X).
 
 capacityReached :-
 	carrying_gold(G) &
@@ -82,18 +83,23 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 +!goto(X,Y): pos(X,Y) <-
 	!skipTurn.
 +!goto(X,Y): moves_left(N) & N == 0.
-+!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <- for ( .member(X,Moves) ) {
-        do(X);    // print all members of the list
-     }
++!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <-
+	.println("Moves: ",Moves);	
+	for ( .member(X,Moves) ) 
+	{	
+		.println("Moving ",X);
+		do(X);    // print all members of the list
+	}
 	!scanArea.
 
 	
 +!explore : pos(A,B)<-
-	.println("** Exploring", A, B);
-	.findall(dst(Dist,X,Y), unexplored(X,Y) & get_distance(loc(A,B), loc(X,Y), Dist), Unx);
+	.println("** Exploring", A,", ", B);
+	.findall(dst(Dist,X,Y),unexplored(X,Y) & 
+		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y), Unx);
 	.min(Unx, Dst);
 	Dst = dst(_, X, Y);
-	+goto(X,Y).
+	!goto(X,Y).
 	
 
 	
@@ -104,30 +110,82 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 
 +!scanArea <-
 	?pos(X,Y);
-	?sight(S);
-	.findall(unexplored(UX,UY),math.abs(X-UX) <= S & math.abs(Y-UY) <= S, L);
+	?sight(Sight);
+	
+	.findall(unexplored(UX,UY),unexplored(UX,UY) & math.abs(X-UX) <= Sight & math.abs(Y-UY) <= Sight, U);
+
+	.println("Position: ",X, ", ", Y);
+	.println("Sight: ",Sight);
+	.println("Removing: ",U);
 
 	// remove unexplored tiles
-	for (.member(M,L))
+	for (.member(M,U))
 	{
-		-unexplored(X,Y);
-		!untellFriends(unexplored(X,Y));
+		.abolish(M);
+		!untellFriends(M);
 	};
 
 	// remove vanished resources
-	for (.member([dbShoes(_,_),dbGloves(_,_),dbSpectacles(_,_),dbGold(_,_),dbWood(_,_)],Item))
+	.findall(dbShoes(IX,IY),dbShoes(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, H);
+	for (.member(M,H))
 	{
-		// for all items from memory (from DB)
-		.findall(Item,getPos(Item,IX,IY) & math.abs(X-IX) <= S & math.abs(Y-IY) <= S, L);
-		for (.member(M,L))
+		// if percept not doesn't agree
+		if (getPos(M,IX,IY) & not shoes(IX,IY))
 		{
-			// if percept not doesn't agree
-			if (map(Item,Percept) & not Percept)
-			{
-				.abolish(Item);
+			.abolish(M);
+			!untellFriends(M);
+			!untellFriends(targeted(IX,IY));
+		}
+	};
 
-				!untellFriends(Item);
-				!untellFriends(targeted(IX,IY));
-			}
+	.findall(dbGloves(IX,IY),dbGloves(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, L);
+	for (.member(M,L))
+	{
+		// if percept not doesn't agree
+		if (getPos(M,IX,IY) & not gloves(IX,IY))
+		{
+			.abolish(M);
+			!untellFriends(M);
+			!untellFriends(targeted(IX,IY));
+		}
+	};	
+
+	.findall(dbSpectacles(IX,IY),dbSpectacles(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, P);
+	for (.member(M,P))
+	{
+		// if percept not doesn't agree
+		if (getPos(M,IX,IY) & not spectacles(IX,IY))
+		{
+			.abolish(M);
+
+			!untellFriends(M);
+			!untellFriends(targeted(IX,IY));
+		}
+	};
+
+	.findall(dbGold(IX,IY),dbGold(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, G);
+	for (.member(M,G))
+	{
+		// if percept not doesn't agree
+		if (getPos(M,IX,IY) & not gold(IX,IY))
+		{
+			.abolish(M);
+
+			!untellFriends(M);
+			!untellFriends(targeted(IX,IY));
+		}
+	};
+
+	.findall(dbWood(IX,IY),dbWood(IX,IY) & math.abs(X-IX) <= Sight & math.abs(Y-IY) <= Sight, W);
+	for (.member(M,W))
+	{
+		// if percept not doesn't agree
+		if (getPos(M,IX,IY) & not wood(IX,IY))
+		{
+			.abolish(M);
+
+			!untellFriends(M);
+			!untellFriends(targeted(IX,IY));
 		}
 	}.
+
