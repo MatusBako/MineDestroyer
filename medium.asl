@@ -1,6 +1,5 @@
 sight(1). // different for other agents
 
-{ include("a_star.asl") }
 { include("common.asl") }	
 { include("percepts.asl") }
 

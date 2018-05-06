@@ -1,4 +1,4 @@
-{ include("a_star.asl") }
+
 // map between BB info and percepts
 map(dbShoes(X,Y),shoes(X,Y)).
 map(dbGloves(X,Y),gloves(X,Y)).
@@ -125,7 +125,8 @@ canCarryGold :- carrying_wood(W) & W == 0 & not capacityReached.
 	}.
 +!goto(X,Y).
 	
-	
+get_distance(loc(FromX, FromY), loc(ToX, ToY), Dist) :- Dist = math.abs(FromX-ToX) + math.abs(FromY-ToY).
+
 +!explore : pos(A,B)<-
 	.findall(dst(Dist,X,Y),unexplored(X,Y) & 
 		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y) , Unx);

@@ -209,7 +209,7 @@ public class astar extends DefaultInternalAction {
             return un.unifies(ASSyntax.createLiteral(move), args[args.length-1]);
         }
         
-        ts.getAg().getLogger().info("*** A* failed  ");
+        //ts.getAg().getLogger().info("*** A* failed  ");
         return un.unifies(ASSyntax.createLiteral("fail"), args[args.length-1]);
 
     }
