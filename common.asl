@@ -93,23 +93,19 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 		do(M);
 		!scanArea
 	}.*/
-+!goto(X,Y)  <-
-	.println("From: ",loc(A,B));
-	.println("To: ",loc(X,Y));
++!goto(X,Y) <-
 	while (  moves_left(N) & N>0 ) 
 	{	
-		.println(N, " moves left");
-		?pos(A,B); ?get_instructions(loc(A,B), loc(X,Y), 1, Moves);
-		//.println("Moving ",M);
-		for ( .member(M,Moves) ) 
-		{	
-			.println("Moving ",M);
-			do(M);
-			!scanArea;
-		};
+		?pos(A,B);
+		.println("From: ",loc(A,B));
+		.println("To: ",loc(X,Y));
+		astar.astar(A, B, X, Y, Move);
+		.println("Going  ",Move);
+		do(Move);
+		!scanArea;
 	};
-	.println("** finished moving to ", X, Y).
-
+	//.println("** finished moving to ", X, Y)
+	.
 	
 +!explore : pos(A,B)<-
 	.findall(dst(Dist,X,Y),unexplored(X,Y) & 

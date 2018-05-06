@@ -66,7 +66,7 @@ astar(Open, Closed, Start, Goal, Solution) :- astar(Open, Closed, Start, Goal, [
 astar(_, _, Start, Goal, [Goal|Path], Solution) :-
 	.reverse([Goal|Path], Solution).
 astar(_, Closed, Start, Goal, Path, Solution) :-
-	.length(Closed) > 20 &
+	.length(Closed) > 40 &
 	.reverse(Path, Solution).
 astar(Open, Closed, Start, Goal, Path, Solution) :-
 	get_min(Open, node(Best, Gscore, BestVal))&
@@ -103,7 +103,11 @@ filter_impossible([H|T], F) :-
 possible(loc(X,Y)):-
 	grid_size(A, B) & X<A & Y<B &
 	not dbObstacle(X,Y).
-
+	
+possible(X,Y):-
+	grid_size(A, B) & X<A & Y<B &
+	not dbObstacle(X,Y).
+	
 //Filters out nodes that are in the closed set
 filter_closed([], _, []).
 filter_closed([H|T], Closed, F) :-
