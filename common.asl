@@ -41,13 +41,23 @@ capacityReached :-
 	carrying_capacity(MAX) &
 	G + W == MAX.
 
+capacityReached :-
+	carrying_gold(G) & G>0 &
+	not dbGold(_,_) &
+	not unexplored(_,_).
+
+capacityReached :-
+	carrying_wood(W) & W>0 &
+	not dbWood(_,_) &
+	not unexplored(_,_).
+	
 inSight(X,Y,TX,TY) :- 
 	sight(Sight) & 
 	math.abs(X-TX) <= Sight &
 	math.abs(Y-TY) <= Sight.
 
-canCarryWood :- carrying_gold(G) & G == 0 & ~capacityReached.
-canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
+canCarryWood :- carrying_gold(G) & G == 0 & not capacityReached.
+canCarryGold :- carrying_wood(W) & W == 0 & not capacityReached.
 
 +!pick(dbShoes(X,Y)) <-
 	do(pick);
@@ -83,103 +93,38 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 +!goto(X,Y): pos(X,Y) <-
 	!skipTurn.
 +!goto(X,Y): moves_left(N) & N == 0.
-
-
-/*+!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <-
-	.println("Moves: ",Moves);
-	.println("From: ",loc(A,B));
-	.println("To: ",loc(X,Y));
-	for ( .member(M,Moves) ) 
-	{	
-		//.println("Moving ",M);
-		do(M);
-		!scanArea
-	}.*/
-+!goto(X,Y) <-
-	while (  moves_left(N) & N>0 ) 
++!goto(X,Y) <- ?moves_left(N);
+	for (.range(_,1,N))
 	{	
 		?pos(A,B);
-		.println("From: ",loc(A,B));
-		.println("To: ",loc(X,Y));
+		//.println("From: ",loc(A,B));
+		//.println("To: ",loc(X,Y));
 		astar.astar(A, B, X, Y, Move);
-		.println("Going  ",Move);
-		do(Move);
+		//.println("Going  ",Move);
+		if (Move == fail)
+		{
+			.abolish(unexplored(X,Y));
+			!untellFriends(unexplored(X,Y));
+			do(skip);
+		}
+		else
+		{
+			do(Move);
+		}
 		!scanArea;
 	};
-	.println("** finished movingZ to ", X, Y).
-
-// fallback gotos
-+!goto(X,Y) : pos(A,B) & X >= A & Y >= B <-
-	if (X > A & not dbObstacle(X+1,Y))
-	{
-		do(right)
-	}
-	else
-	{
-		if (not dbObstacle(X,Y+1))
-		{
-			do(up)
-		}
-		else
-		{
-			do(skip)
-		}
+	//.println("** finished moving to ", X, Y)
+	.
++!goto(X,Y) <- 
+	.abolish(unexplored(X,Y));
+	!untellFriends(unexplored(X,Y));
+	?moves_left(N);
+	for (.range(_,1,N))
+	{	
+		do(skip);
 	}.
-
-
-+!goto(X,Y) : pos(A,B) & X < A & Y >= B <-
-	if (not dbObstacle(X,Y+1))
-	{
-		do(up)
-	}
-	else
-	{
-		if (not dbObstacle(X-1,Y))
-		{
-			do(left)
-		}
-		else
-		{
-			do(skip)
-		}
-	}.
-
-+!goto(X,Y) : pos(A,B) & X <= A & Y <= B <-
-	if (X < A & not dbObstacle(X-1,Y))
-	{
-		do(left)
-	}
-	else
-	{
-		if (not dbObstacle(X,Y-1))
-		{
-			do(down)
-		}
-		else
-		{
-			do(skip)
-		}
-	}.
-
-
-+!goto(X,Y) : pos(A,B) & X > A & Y <= B <-
-	if (not dbObstacle(X,Y-1))
-	{
-		do(down)
-	}
-	else
-	{
-		if (not dbObstacle(X+1,Y))
-		{
-			do(right)
-		}
-		else
-		{
-			do(skip)
-		}
-	}.
-
-
++!goto(X,Y).
+	
 	
 +!explore : pos(A,B)<-
 	.findall(dst(Dist,X,Y),unexplored(X,Y) & 

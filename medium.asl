@@ -21,7 +21,7 @@ sight(1). // different for other agents
 +!nextAction: dbGloves(X,Y) & not hasGloves <-
 	!target(X,Y);
 	!goto(X,Y).
-+!nextAction: canCarryWood & canCarryGold <-
++!nextAction: canCarryWood & canCarryGold  & (dbWood(_,_) | dbGold(_,_)) <-
     !findRes.
 +!nextAction: canCarryWood & dbWood(_,_) <-
 	!findWood.
@@ -74,19 +74,13 @@ sight(1). // different for other agents
 	!pick(dbGold(X,Y)).
 
 +step(S): canCarryWood & canCarryGold & (dbWood(_,_) | dbGold(_,_)) <-
-	//TODO: - get closest of all untargeted Wood and Gold
-	!target(X,Y);
-	!goto(X,Y).
+	!findRes.
 
 +step(S): canCarryWood & dbWood(_,_) <- 
-	//TODO: - get closest of all untargeted Wood
-	!target(X,Y);
-	!goto(X,Y).
+	!findWood.
 
 +step(S): canCarryGold & dbGold(_,_) <- 
-	//TODO: - get closest of all untargeted Gold
-	!target(X,Y);
-	!goto(X,Y).
+	!findGold.
 
 // exploration
 +step(S): unexplored(X,Y) <-

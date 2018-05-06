@@ -210,7 +210,7 @@ public class astar extends DefaultInternalAction {
         }
         
         ts.getAg().getLogger().info("*** A* failed  ");
-        return false;
+        return un.unifies(ASSyntax.createLiteral("fail"), args[args.length-1]);
 
     }
 
