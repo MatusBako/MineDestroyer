@@ -27,8 +27,8 @@ sight(3). // different for other agents
 +!nextAction: dbSpectacles(X,Y) & not hasSpectacles <-
 	!target(X,Y);
 	!goto(X,Y).
-+!nextAction: canCarryWood & canCarryGold  & (dbWood(_,_) | dbGold(_,_))<-
-    !findRes.
++!nextAction: canCarryWood  & dbWood(_,_) <-
+    !findWood.
 +!nextAction.
 
 
@@ -65,20 +65,31 @@ sight(3). // different for other agents
 	?dbDepot(X,Y);
 	!goto(X,Y).
 
++step(S): returnBase & pos(X,Y) & dbDepot(X,Y) <-
+	do(drop);
+	!nextAction.
+
++step(S): returnBase <-
+	?depot(X,Y);
+	!goto(X,Y).
+
 +step(S): pos(X,Y) & wood(X,Y) & canCarryWood <-
 	!pick(dbWood(X,Y)).
 
-+step(S): pos(X,Y) & gold(X,Y) & canCarryGold <-
-	!pick(dbGold(X,Y)).
+/*+step(S): pos(X,Y) & gold(X,Y) & canCarryGold <-
+	!pick(dbGold(X,Y)).*/
 
 /*+step(S): canCarryWood & canCarryGold & (dbWood(_,_) | dbGold(_,_)) <-
 	!findRes.*/
 
 +step(S): canCarryWood & dbWood(_,_) <- 
 	!findWood.
-
+/*
 +step(S): canCarryGold & dbGold(_,_) <- 
-	!findGold.
+	!findGold.*/
 
++step(S)<-
+	?depot(X,Y);
+	!goto(X,Y).
 +step(S).
 

@@ -41,15 +41,15 @@ capacityReached :-
 	carrying_capacity(MAX) &
 	G + W == MAX.
 
-capacityReached :-
+returnBase :-
 	carrying_gold(G) & G>0 &
-	not dbGold(_,_) &
-	not unexplored(_,_).
+	not dbGold(X,Y) &
+	not unexplored(A,B).
 
-capacityReached :-
+returnBase :-
 	carrying_wood(W) & W>0 &
-	not dbWood(_,_) &
-	not unexplored(_,_).
+	not dbGold(X,Y) &
+	not unexplored(A,B).
 	
 inSight(X,Y,TX,TY) :- 
 	sight(Sight) & 
@@ -124,7 +124,15 @@ canCarryGold :- carrying_wood(W) & W == 0 & not capacityReached.
 		do(skip);
 	}.
 +!goto(X,Y).
-	
+
++!skipTurn <- 
+	.println("Skipping");
+	?moves_left(N);
+	for (.range(_,1,N))
+	{	
+		do(skip);
+	}.
+
 get_distance(loc(FromX, FromY), loc(ToX, ToY), Dist) :- Dist = math.abs(FromX-ToX) + math.abs(FromY-ToY).
 
 +!explore : pos(A,B)<-

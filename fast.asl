@@ -21,12 +21,12 @@ sight(1). // different for other agents
 +!nextAction: dbShoes(X,Y) & not hasShoes <-
 	!target(X,Y);
 	!goto(X,Y).
-+!nextAction: canCarryWood & canCarryGold & (dbWood(_,_) | dbGold(_,_)) <-
-    !findRes.
-+!nextAction: canCarryWood & dbWood(_,_) <-
++!nextAction: canCarryWood & dbWood(X,Y) <-
 	!findWood.
-+!nextAction: canCarryGold & dbGold(_,_)  <-
+/*+!nextAction: canCarryGold & dbGold(X,Y)  <-
 	!findGold.
++!nextAction: canCarryWood & canCarryGold & (dbWood(X,Y) | dbGold(X,Y)) <-
+    !findRes.*/
 +!nextAction: unexplored(X,Y) <-
 	!explore.
 +!nextAction.
@@ -65,27 +65,43 @@ sight(1). // different for other agents
 	?depot(X,Y);
 	!goto(X,Y).
 
++step(S): returnBase & pos(X,Y) & dbDepot(X,Y) <-
+	do(drop);
+	!nextAction.
+
++step(S): returnBase <-
+	?depot(X,Y);
+	!goto(X,Y).
+
 // pickup Resources
 +step(S): pos(X,Y) & wood(X,Y) & canCarryWood <-
 	!pick(dbWood(X,Y)).
 
-+step(S): pos(X,Y) & gold(X,Y) & canCarryGold <-
++step(S): pos(X,Y) & gold(X,Y) & canCarryGold & ally(X,Y) <-
 	!pick(dbGold(X,Y)).
-
-+step(S): canCarryWood & canCarryGold & (dbWood(_,_) | dbGold(_,_)) <-
+	
++step(S): come(X,Y) & canCarryGold<-
+	!goto(X,Y).
++step(S): come(X,Y) &  pos(X,Y)<-
+	.abolish(come(X,Y)).
+/*+step(S): canCarryWood & canCarryGold & (dbWood(_,_) | dbGold(_,_)) <-
 	!findRes.
-
-+step(S): canCarryWood & dbWood(_,_) <- 
+*/
++step(S): canCarryWood & dbWood(X,Y) <- 
 	!findWood.
-
+/*
 +step(S): canCarryGold & dbGold(_,_) <- 
-	!fingGold.
-
+	!findGold.
+*/
 
 // exploration
 +step(S): unexplored(X,Y) <-
 	!explore.
 
 // terminal rule
++step(S) <-
+	?depot(X,Y);
+	!goto(X,Y).
+	
 +step(S).
 
