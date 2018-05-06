@@ -83,6 +83,8 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 +!goto(X,Y): pos(X,Y) <-
 	!skipTurn.
 +!goto(X,Y): moves_left(N) & N == 0.
+
+
 /*+!goto(X,Y): moves_left(N) & pos(A,B) & get_instructions(loc(A,B), loc(X,Y), N, Moves) <-
 	.println("Moves: ",Moves);
 	.println("From: ",loc(A,B));
@@ -93,6 +95,8 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 		do(M);
 		!scanArea
 	}.*/
+
+
 +!goto(X,Y)  <-
 	.println("From: ",loc(A,B));
 	.println("To: ",loc(X,Y));
@@ -108,7 +112,79 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 			!scanArea;
 		};
 	};
-	.println("** finished moving to ", X, Y).
+	.println("** finished movingZ to ", X, Y).
+
+// fallback gotos
++!goto(X,Y) : pos(A,B) & X >= A & Y >= B <-
+	if (X > A & not dbObstacle(X+1,Y))
+	{
+		do(right)
+	}
+	else
+	{
+		if (not dbObstacle(X,Y+1))
+		{
+			do(up)
+		}
+		else
+		{
+			do(skip)
+		}
+	}.
+
+
++!goto(X,Y) : pos(A,B) & X < A & Y >= B <-
+	if (not dbObstacle(X,Y+1))
+	{
+		do(up)
+	}
+	else
+	{
+		if (not dbObstacle(X-1,Y))
+		{
+			do(left)
+		}
+		else
+		{
+			do(skip)
+		}
+	}.
+
++!goto(X,Y) : pos(A,B) & X <= A & Y <= B <-
+	if (X < A & not dbObstacle(X-1,Y))
+	{
+		do(left)
+	}
+	else
+	{
+		if (not dbObstacle(X,Y-1))
+		{
+			do(down)
+		}
+		else
+		{
+			do(skip)
+		}
+	}.
+
+
++!goto(X,Y) : pos(A,B) & X > A & Y <= B <-
+	if (not dbObstacle(X,Y-1))
+	{
+		do(down)
+	}
+	else
+	{
+		if (not dbObstacle(X+1,Y))
+		{
+			do(right)
+		}
+		else
+		{
+			do(skip)
+		}
+	}.
+
 
 	
 +!explore : pos(A,B)<-
@@ -117,8 +193,33 @@ canCarryGold :- carrying_wood(W) & W == 0 & ~capacityReached.
 	.min(Unx, Dst);
 	Dst = dst(_, X, Y);
 	!goto(X,Y).
-	
 
+
+	
++!findRes : pos(A,B)<-
+	.findall(dst(Dist,X,Y),(dbWood(X,Y) | dbGold(X,Y)) & 
+		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y) , Unx);
+	.min(Unx, Dst);
+	Dst = dst(_, X, Y);
+	!goto(X,Y).
+	
+	
++!findWood : pos(A,B)<-
+	.findall(dst(Dist,X,Y),dbWood(X,Y) & 
+		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y) , Unx);
+	.min(Unx, Dst);
+	Dst = dst(_, X, Y);
+	!goto(X,Y).
+	
+		
++!findGold : pos(A,B)<-
+	.findall(dst(Dist,X,Y),dbGold(X,Y) & 
+		get_distance(loc(A,B), loc(X,Y), Dist) & not targeted(X,Y) , Unx);
+	.min(Unx, Dst);
+	Dst = dst(_, X, Y);
+	!goto(X,Y).
+	
+	
 	
 +!target(X,Y) <-
 	+target(X,Y);

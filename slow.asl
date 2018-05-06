@@ -27,12 +27,8 @@ sight(3). // different for other agents
 +!nextAction: dbSpectacles(X,Y) & not hasSpectacles <-
 	!target(X,Y);
 	!goto(X,Y).
-+!nextAction: dbWood(X,Y) & not targeted(X,Y) <-
-	!target(X,Y);
-	!goto(X,Y).
-+!nextAction: dbGold(X,Y) & not targeted(X,Y) <-
-	!target(X,Y);
-	!goto(X,Y).
++!nextAction: canCarryWood & canCarryGold <-
+    !findRes.
 +!nextAction.
 
 
