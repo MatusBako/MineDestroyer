@@ -22,17 +22,11 @@ sight(1). // different for other agents
 	!target(X,Y);
 	!goto(X,Y).
 +!nextAction: canCarryWood & canCarryGold <-
-	//TODO: - get closest of all untargeted Wood and Gold
-	!target(X,Y);
-	!goto(X,Y).
-+!nextAction: canCarryWood & dbGold(_,_) <-
-	//TODO: - get closest of all untargeted Wood
-	!target(X,Y);
-	!goto(X,Y).
+    !findRes.
++!nextAction: canCarryWood & dbWood(_,_) <-
+	!findWood.
 +!nextAction: canCarryGold & dbGold(_,_)  <-
-	//TODO: - get closest of all untargeted Gold
-	!target(X,Y);
-	!goto(X,Y).
+	!findGold.
 +!nextAction: unexplored(X,Y) <-
 	!explore.
 +!nextAction.
